@@ -37,7 +37,6 @@ namespace thread_guard{
     }
 
 
-
     class widget{
 
     };
@@ -55,7 +54,7 @@ namespace thread_guard{
 
 namespace scoped_thread{
     void func(int &x){
-        std::cout << "func" << x << std::endl;
+        std::cout << "func x=" << x << std::endl;
     }
 
     //scoped_thread 要比thread_guard更好
@@ -63,7 +62,7 @@ namespace scoped_thread{
     private:
         std::thread t_;
     public:
-        scoped_thread(std::thread t): t_(std::move(t)){
+        scoped_thread(std::thread &&t): t_(std::move(t)){
             if(!t_.joinable()){
                 throw std::logic_error("No thread");
             }
@@ -79,7 +78,7 @@ namespace scoped_thread{
         int some_local_state = 0;
         std::thread t(func, std::ref(some_local_state));
         scoped_thread s(std::move(t));
-//    do_some_thing_in_current_thread();
+        std::cout << "do_some_thing_in_current_thread()\n";
     }
 }
 

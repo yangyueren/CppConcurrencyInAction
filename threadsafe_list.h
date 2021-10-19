@@ -20,10 +20,9 @@ namespace threadsafe_list{
             node(): next(){
             }
             node(T const& value): data(std::make_shared<T>(value)){}
-        };
+        }; // end of struct node
 
         node head_; //dummpy head
-
 
     public:
         threadsafe_list(){}

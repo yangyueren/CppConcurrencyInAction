@@ -2,9 +2,6 @@
 // Created by yryang on 2021/10/19.
 //
 
-
-
-#include <cassert>
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -90,6 +87,7 @@ namespace threadsafe_queue{
 
         std::cout << "creating threads..." << std::endl;
         std::vector<std::thread> threads;
+        threads.reserve(thread_num);
         for (int i = 0; i < thread_num; ++i) {
             threads.push_back(std::thread(consumer, std::ref(queue), std::ref(queue_ans)));
         }

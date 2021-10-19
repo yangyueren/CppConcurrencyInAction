@@ -2,20 +2,19 @@
 // Created by yryang on 2021/10/19.
 //
 
-#include <cassert>
+#include "threadsafe_stack.h"
+
 #include <iostream>
 #include <vector>
 
-
-#include "threadsafe_stack.h"
 #include "util.h"
+
 
 namespace threadsafe_stack{
     void push_test(threadsafe_stack<int> &stack, std::vector<int> v){
         for (auto &&vv: v){
             stack.push(vv);
         }
-
 
         v.clear();
         while (!stack.empty()){
@@ -26,7 +25,6 @@ namespace threadsafe_stack{
             } catch (...) {
                 std::cout << "wrong empty\n";   // stack.empty() stack.pop() 有并发冲突
             }
-
         }
         for (auto &&vv: v){
             stack.push(vv);
