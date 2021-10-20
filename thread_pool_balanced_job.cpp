@@ -40,7 +40,6 @@ namespace thread_pool_balanced_job{
         }
         std::this_thread::sleep_for(std::chrono::seconds(4));
         for (int i = 0; i < futures.size(); ++i) {
-//            futures[i].get();
             int res = futures[i].get();
             std::cout << "res " << res << std::endl;
             ASSERT(res == i, "wrong");
