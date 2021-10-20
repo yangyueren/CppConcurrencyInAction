@@ -18,4 +18,4 @@ bucket_const_iterator find_entry_for(Key const& key) const {
 ## TODO LIST
 - [x] basic thread safe structures
 - [ ] concurrent algorithms
-- [ ] thread pool
+- [x] thread pool
