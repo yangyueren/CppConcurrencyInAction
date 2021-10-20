@@ -50,6 +50,7 @@ namespace thread_pool_balanced_job{
     }
 }
 
+// TODO, static member initialization must be contained in .cc file.
 thread_local thread_pool_balanced_job::work_stealing_queue* thread_pool_balanced_job::thread_pool_balanced_job::local_work_queue = nullptr;
 thread_local unsigned int thread_pool_balanced_job::thread_pool_balanced_job::my_index_ = -1;
 
