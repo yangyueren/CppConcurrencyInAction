@@ -60,12 +60,20 @@ namespace threadsafe_queue{
             return res;
         }
 
-        void push(T new_value){
+        void push(const T &new_value){
             std::shared_ptr<T> t = std::make_shared<T>(new_value);
             std::lock_guard<std::mutex> lockGuard(mtx_);
             data_.push(t);
             data_cond_.notify_all();
         }
+
+        void push(T &&new_value){
+            std::shared_ptr<T> t = std::make_shared<T>(std::move(new_value));
+            std::lock_guard<std::mutex> lockGuard(mtx_);
+            data_.push(t);
+            data_cond_.notify_all();
+        }
+
 
         bool empty(){
             std::lock_guard<std::mutex> lockGuard(mtx_);
@@ -122,8 +130,21 @@ namespace threadsafe_queue{
 
 
 
-        void push(T new_value){
+        void push(const T &&new_value){
             std::shared_ptr<T> new_data = std::make_shared<T>(new_value);
+            std::unique_ptr<node> tmp(new node);
+            node* new_tail = tmp.get();
+            {
+                std::lock_guard<std::mutex> lockGuard(tail_mtx_);
+                tail_->data = new_data;
+                tail_->next = std::move(tmp);
+                tail_ = new_tail;
+            }
+            data_cond_.notify_all();
+        }
+
+        void push(T &&new_value){
+            std::shared_ptr<T> new_data = std::make_shared<T>(std::move(new_value));
             std::unique_ptr<node> tmp(new node);
             node* new_tail = tmp.get();
             {

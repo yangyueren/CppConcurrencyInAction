@@ -6,30 +6,34 @@
 #define CPPTEST_SCOPED_THREAD_H
 
 #include <iostream>
+#include <vector>
 #include <thread>
 
-namespace thread_guard{
-    void func(){
+namespace thread_guard {
+    void func() {
         std::cout << "func" << std::endl;
     }
 
-    class thread_guard{
+    class thread_guard {
         std::thread &t;
     public:
-        explicit thread_guard(std::thread& t): t(t){
+        explicit thread_guard(std::thread &t) : t(t) {
 
         }
-        ~thread_guard(){
-            if(t.joinable()){
+
+        ~thread_guard() {
+            if (t.joinable()) {
                 t.join();
             }
         }
-        thread_guard(const thread_guard& t) = delete;
-        thread_guard& operator=(const thread_guard&) = delete;
+
+        thread_guard(const thread_guard &t) = delete;
+
+        thread_guard &operator=(const thread_guard &) = delete;
 
     };
 
-    void test(){
+    void test() {
         int local_state = 0;
         std::thread t(func);
         thread_guard g(t);
@@ -37,13 +41,15 @@ namespace thread_guard{
     }
 
 
-    class widget{
+    class widget {
 
     };
-    void update_data(widget& data){
+
+    void update_data(widget &data) {
         //
     }
-    void test2(){
+
+    void test2() {
         widget data;
         std::thread t(update_data, std::ref(data)); // 如果不加 std::ref(data)编译不通过，
         // 尽管update_data的第一个参数期待传入一个引用，但是std::thread的构造函数并不知晓；
@@ -52,34 +58,54 @@ namespace thread_guard{
 
 }
 
-namespace scoped_thread{
-    void func(int &x){
+namespace scoped_thread {
+    void func(int &x) {
         std::cout << "func x=" << x << std::endl;
     }
 
     //scoped_thread 要比thread_guard更好
-    class scoped_thread{
+    class scoped_thread {
     private:
         std::thread t_;
     public:
-        scoped_thread(std::thread &&t): t_(std::move(t)){
-            if(!t_.joinable()){
+        scoped_thread(std::thread &&t) : t_(std::move(t)) {
+            if (!t_.joinable()) {
                 throw std::logic_error("No thread");
             }
         }
-        ~scoped_thread(){
+
+        ~scoped_thread() {
             t_.join();
         }
-        scoped_thread(const scoped_thread&) = delete;
-        scoped_thread& operator=(const scoped_thread&) = delete;
+
+        scoped_thread(const scoped_thread &) = delete;
+
+        scoped_thread &operator=(const scoped_thread &) = delete;
     };
 
-    void test(){
+    void test() {
         int some_local_state = 0;
         std::thread t(func, std::ref(some_local_state));
         scoped_thread s(std::move(t));
         std::cout << "do_some_thing_in_current_thread()\n";
     }
+}
+
+namespace join_threads {
+    class join_threads {
+    private:
+        std::vector<std::thread> &threads;
+    public:
+        explicit join_threads(std::vector<std::thread> &threads_) :
+                threads(threads_) {}
+
+        ~join_threads() {
+            for (unsigned long i = 0; i < threads.size(); ++i) {
+                if (threads[i].joinable()) threads[i].join();
+            }
+        }
+
+    };
 }
 
 #endif //CPPTEST_SCOPED_THREAD_H
