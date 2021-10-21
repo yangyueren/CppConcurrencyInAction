@@ -1,5 +1,6 @@
 # CppConcurrencyInAction
 The repository contains source code for the book CppConcurrencyInAction.
+My notes are [here](https://www.notion.so/1a56bd8aaa934ad0a56c617302d03ffe?v=95b5115bbd764c0097a29941ff2d334b)
 
 There are some basic thread safe data structures in first part, such as threadsafe_stack, threadsafe_queue.
 
