@@ -22,7 +22,7 @@ namespace threadsafe_stack{
         mutable std::mutex mtx_;
 
     public:
-        threadsafe_stack(): data_(std::stack<T>()), mtx_(std::mutex()){}
+        threadsafe_stack(): data_(std::stack<T>()){}
 
         threadsafe_stack(const threadsafe_stack& other){
             std::lock_guard<std::mutex> lockGuard(other.mtx_);
@@ -31,25 +31,32 @@ namespace threadsafe_stack{
 
         threadsafe_stack& operator=(const threadsafe_stack&) = delete;
 
-        void push(T new_value){
+        void push(T const &new_value){
             std::lock_guard<std::mutex> lockGuard(mtx_);
             data_.push(new_value);
         }
+
+        void push(T &&new_value){
+            std::lock_guard<std::mutex> lockGuard(mtx_);
+            data_.push(std::move(new_value));
+        }
+
         std::shared_ptr<T> pop(){
             std::lock_guard<std::mutex> lockGuard(mtx_);
-            if(data_.empty()) throw empty_stack();
+            if(data_.empty()) return std::shared_ptr<T>();
 
-            std::shared_ptr<T> const res(std::make_shared<T>(data_.top()));
+            std::shared_ptr<T> const res(std::make_shared<T>(std::move(data_.top())));
             data_.pop();
             return res;
         }
 
-        void pop(T &value){
+        bool pop(T &value){
             std::lock_guard<std::mutex> lockGuard(mtx_);
-            if (data_.empty()) throw empty_stack();
+            if (data_.empty()) return false;
 
-            value = data_.top();
+            value = std::move(data_.top());
             data_.pop();
+            return true;
         }
 
         bool empty() const{

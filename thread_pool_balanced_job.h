@@ -106,14 +106,7 @@ namespace thread_pool_balanced_job{
             return false;
         }
 
-        void run_pending_task(){
-            task_type task;
-            if (pop_from_local_queue(task) || pop_from_pool_queue(task) || pop_from_other_local_queue(task)){
-                task();
-            }else{
-                std::this_thread::yield();
-            }
-        }
+
 
     public:
         thread_pool_balanced_job(): done(false), joiner(threads){
@@ -132,6 +125,15 @@ namespace thread_pool_balanced_job{
         ~thread_pool_balanced_job(){
             done = true; // TODO, when done is set to true,
             // the worker thread will exit, even there are still tasks in work_queue.
+        }
+
+        void run_pending_task(){
+            task_type task;
+            if (pop_from_local_queue(task) || pop_from_pool_queue(task) || pop_from_other_local_queue(task)){
+                task();
+            }else{
+                std::this_thread::yield();
+            }
         }
 
         template<typename FunctionType>
