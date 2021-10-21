@@ -30,7 +30,7 @@ namespace quicksort{
         };
         const int max_threads_num;
         std::vector<std::thread> threads;
-        threadsafe_stack::threadsafe_stack<chunk> stack;
+        threadsafe_stack::threadsafe_stack<std::shared_ptr<chunk> > stack;
 
         std::atomic_bool done;
 
@@ -56,9 +56,9 @@ namespace quicksort{
         }
 
         void try_sort_chunk(){
-            std::shared_ptr<chunk> chunk_p = stack.pop();
+            std::shared_ptr<chunk> chunk_p;
 
-            if (chunk_p){
+            if (stack.pop(chunk_p)){
                 sort_chunk(chunk_p);
             }
         }
@@ -89,14 +89,15 @@ namespace quicksort{
             T const &pivot = *result.begin();
             auto divide_point = std::partition(chunk_data.begin(), chunk_data.end(), [&](T const &t){return t < pivot;});
 
-            chunk lower_part;
-            lower_part.data.splice(lower_part.data.end(), chunk_data, chunk_data.begin(), divide_point);
-            std::future<std::list<T> > new_lower = lower_part.promise.get_future();
+            std::shared_ptr<chunk> lower_part = std::make_shared<chunk>();
+            lower_part->data.splice(lower_part->data.end(), chunk_data, chunk_data.begin(), divide_point);
+            std::future<std::list<T> > new_lower = lower_part->promise.get_future();
 
-            stack.push(std::move(lower_part));
+            stack.push(lower_part);
 
 
             if (threads.size() < max_threads_num){
+                std::lock_guard<std::mutex> lockGuard(mtx);
                 threads.emplace_back(&sorter<T>::sort_thread, this);
             }
 

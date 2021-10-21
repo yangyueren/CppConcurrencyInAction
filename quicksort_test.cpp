@@ -18,7 +18,7 @@
 
 namespace quicksort{
     void test(std::function<std::list<int>(std::list<int>) > f){
-        int N = 100000;
+        int N = 10000;
         std::vector<int> v;
         for (int i = 0; i < N; ++i) {
             v.push_back(i);
@@ -50,20 +50,35 @@ thread_local thread_pool_balanced_job::work_stealing_queue* thread_pool_balanced
 thread_local unsigned int thread_pool_balanced_job::thread_pool_balanced_job::my_index_ = -1;
 
 
-int main(){
+void test1(){
     std::function<std::list<int>(std::list<int>) > f(quicksort::quicksort_sequential<int>);
+    std::cout << "begin test sequential quicksort.\n";
+    quicksort::test(f);
+}
+
+void test2(){
     std::function<std::list<int>(std::list<int>) > f_using_futures(quicksort::quicksort_using_futures<int>);
+    std::cout << "begin test parallel quicksort using async and futures.\n";
+    quicksort::test(f_using_futures);
+}
+
+void test3(){
     std::function<std::list<int>(std::list<int>) > f_using_chunk(quicksort::quicksort_using_chunk<int>);
+    std::cout << "begin test parallel quicksort using promise and chunk.\n";
+    quicksort::test(f_using_chunk);
+}
+
+void test4(){
     std::function<std::list<int>(std::list<int>) > f_using_pool(quicksort::quicksort_using_pool<int>);
-//    std::cout << "begin test sequential quicksort.\n";
-//    quicksort::test(f);
-//    std::cout << "begin test parallel quicksort using async and futures.\n";
-//    quicksort::test(f_using_futures);
-//
-//    std::cout << "begin test parallel quicksort using promise and chunk.\n";
-//    quicksort::test(f_using_chunk);
 
     std::cout << "begin test parallel quicksort using thread pool.\n";
     quicksort::test(f_using_pool);
+}
+int main(){
+    test1();
+    test2();
+    test3();
+    test4();
+
     return 0;
 }

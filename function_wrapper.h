@@ -13,7 +13,7 @@ class function_wrapper{
         virtual void call() = 0;
         virtual ~impl_base(){}
     };
-    std::unique_ptr<impl_base> impl;
+
 
     template<typename F>
     struct impl_type: impl_base{
@@ -21,6 +21,8 @@ class function_wrapper{
         impl_type(F &&f_): f(std::move(f_)){}
         void  call() override {f();}
     };
+
+    std::unique_ptr<impl_base> impl;
 
 public:
     template<typename F>

@@ -20,8 +20,10 @@ namespace threadsafe_stack{
         while (!stack.empty()){
             try {
                 int t;
-                stack.pop(t);
-                v.push_back(t);
+                if(stack.pop(t)){
+                    v.push_back(t);
+                }
+
             } catch (...) {
                 std::cout << "wrong empty\n";   // stack.empty() stack.pop() 有并发冲突
             }

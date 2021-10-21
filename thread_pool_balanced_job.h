@@ -81,8 +81,16 @@ namespace thread_pool_balanced_job{
         static thread_local work_stealing_queue* local_work_queue;
         static thread_local unsigned int my_index_;
 
+        std::mutex mtx;
+
 
         void worker_thread(unsigned int index){
+            // TODO: use mtx to synchronize all threads
+            // or some thread hasn't been created, the other thread wants to steal data from that thread,
+            // program will crash.
+            std::unique_lock<std::mutex> uniqueLock(mtx);
+            uniqueLock.unlock();
+
             my_index_ = index;
             local_work_queue = queues[my_index_].get();
             while (!done){
@@ -98,7 +106,8 @@ namespace thread_pool_balanced_job{
         }
         bool pop_from_other_local_queue(task_type &task){
             for (int i = 0; i < queues.size(); ++i) {
-                const unsigned int j = (my_index_+i) % queues.size();
+                const unsigned int j = (my_index_+i+1) % queues.size();
+//                std::cout << j << std::endl;
                 if(queues[j]->try_steal(task)){
                     return true;
                 }
@@ -111,7 +120,9 @@ namespace thread_pool_balanced_job{
     public:
         thread_pool_balanced_job(): done(false), joiner(threads){
             try {
+                std::lock_guard<std::mutex> lockGuard(mtx);
                 const unsigned int thread_count = std::thread::hardware_concurrency();
+                std::cout << thread_count << std::endl;
                 for (int i = 0; i < thread_count; ++i) {
                     threads.emplace_back(&thread_pool_balanced_job::worker_thread, this, i); // this is a pointer
                     queues.push_back(std::make_unique<work_stealing_queue>());
