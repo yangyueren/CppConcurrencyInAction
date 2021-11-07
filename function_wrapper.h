@@ -36,6 +36,10 @@ public:
 
     }
     function_wrapper& operator=(function_wrapper &&other){
+        if (this == &other){
+            return *this;
+        }
+        
         impl = std::move(other.impl);
         return *this;
     }
